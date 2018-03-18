@@ -7,20 +7,26 @@ import csv
 import sys
 import argparse
 from datetime import datetime, date
+from getpass import getpass
 
 # parse command line arguments
 parser = argparse.ArgumentParser(description='FINTS to CSV.')
 parser.add_argument('BLZ', help='Bankleitzahl')
 parser.add_argument('KNR', help='Account number')
-parser.add_argument('PIN', help='PIN of the account')
-parser.add_argument('startDate', help='starting date')
-parser.add_argument('endDate', help='end date')
-parser.add_argument('-v', '--verbose', help='increase output verbosity', action="store_true")
-parser.add_argument('-t', '--testrun', help='disables writing to file', action="store_true")
+parser.add_argument('startDate', help='starting date <YYYY-MM-DD>')
+parser.add_argument('endDate', help='end date <YYYY-MM-DD>')
+parser.add_argument('-v', '--verbose', help='increase output verbosity',
+                    action="store_true")
+parser.add_argument('-t', '--testrun', help='disables writing to file',
+                    action="store_true")
+parser.add_argument('-p', '--pin', help='PIN of the account')
 args = parser.parse_args()
 
+if args.pin is None:
+    args.pin = getpass('Pin: ')
+
 # connect to bank via FINTS
-f = FinTS3PinTanClient(args.BLZ, args.KNR, args.PIN, 'https://hbci-pintan.gad.de/cgi-bin/hbciservlet')
+f = FinTS3PinTanClient(args.BLZ, args.KNR, args.pin, 'https://hbci-pintan.gad.de/cgi-bin/hbciservlet')
 accounts = f.get_sepa_accounts()
 
 # get a series of transactions in a specific time frame
